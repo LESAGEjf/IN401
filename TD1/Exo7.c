@@ -52,6 +52,42 @@ FICHIER *my_open(char *file, char *mode){
 	return fp;
 }
 
+int my_getc (FICHIER * fp) {
+	if ((fp->flags & F_R) == 0) return EOF;
+
+	if(fp->reste <= 0){
+		fp->reste = read (fp->fd, fp->buf, MAX);
+		fp->p = fp->buf;
+	}
+
+	return (fp->reste <= 0) ? EOF : (fp->reste--, *(fp->p++));
+}
+
+int my_putc (int c, FICHIER *fp){
+	if((fp->flags & F_W) ==0) return EOF;
+
+	if(fp->reste >= MAX){
+		if(write (fp->fd, fp->buf, MAX) != MAX)
+			return EOF;
+		fp->p = fp->buf;
+		fp->reste = 0;
+	}
+
+	*(fp->p++) = c;
+	fp->reste++;
+	return c;
+}
+
+int my_close (FICHIER *fp){
+	if((fp->flags & F_W) != 0 && fp->reste > 0){
+		if(write (fp->fd, fp->buf, fp->reste) != fp->reste)
+			return EOF;
+	}
+	close (fp->fd);
+	free (fp);
+	return 0;
+}
+
 int main (int argc, char *argv[]){
 	FICHIER *f1, *f2;
 	int c;
