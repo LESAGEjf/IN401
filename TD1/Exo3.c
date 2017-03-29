@@ -11,7 +11,7 @@ int main () {
 	toto = open("toto", O_RDONLY);
 	titi = open("titi", O_CREAT | O_WRONLY);
 	
-	while(read(toto,&tmp,1) !=0){
+	while(read(toto,&tmp,MAXBUF) !=0){
 		write(titi,&tmp,1);
 	}
 	
